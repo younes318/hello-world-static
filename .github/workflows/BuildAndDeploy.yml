@@ -1,0 +1,114 @@
+name: Build and Deploy
+env:
+  APP_LOCATION: "/" # location of your client code
+  API_LOCATION: "api" # location of your api source code - optional
+  OUTPUT_LOCATION: "dist" # location of client code build output
+on:
+  push:
+    branches: [ "master" ]
+  workflow_dispatch:
+  
+permissions:
+  issues: write
+  contents: read
+  
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: code check
+      run: |
+        echo Code check 
+        echo This is the task of code check
+      
+    - name: unit testing
+      run: |
+        echo Unit testing 
+        echo This is the task of unit testing
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        
+    - run: npm ci
+    - run: npm run build --if-present
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: my-artifact
+        path: .
+
+  testing:
+    name: Deploy to testing
+    needs: build
+    environment:
+      name: testing
+    runs-on: ubuntu-latest
+    steps:
+     - name: Download artifacts
+       uses: actions/download-artifact@v2
+       with:
+          name: my-artifact
+     - name: deploy
+       uses: Azure/static-web-apps-deploy@1a947af9992250f3bc2e68ad0754c0b0c11566c9
+       with:
+        azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_DELIGHTFUL_COAST_050C2C10 }}
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        action: "upload"
+        app_location: ${{ env.APP_LOCATION }}
+        api_location: ${{ env.API_LOCATION }}
+        output_location: ${{ env.OUTPUT_LOCATION }}
+
+  staging:
+    name: Deploy to staging
+    needs: testing
+    environment:
+      name: staging
+    runs-on: ubuntu-latest
+    steps:
+     - name: Download artifacts
+       uses: actions/download-artifact@v2
+       with:
+          name: my-artifact
+     - name: deploy
+       uses: Azure/static-web-apps-deploy@1a947af9992250f3bc2e68ad0754c0b0c11566c9
+       with:
+        azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_RED_RIVER_0EA2F3100 }}
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        action: "upload"
+        app_location: ${{ env.APP_LOCATION }}
+        api_location: ${{ env.API_LOCATION }}
+        output_location: ${{ env.OUTPUT_LOCATION }}
+
+  production:
+    name: Deploy to production
+    needs: testing
+    environment:
+      name: production
+    runs-on: ubuntu-latest
+    steps:
+     - name: Download artifacts
+       uses: actions/download-artifact@v2
+       with:
+          name: my-artifact
+     - name: deploy
+       uses: Azure/static-web-apps-deploy@1a947af9992250f3bc2e68ad0754c0b0c11566c9
+       with:
+        azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_GENTLE_MUSHROOM_0CF1F910 }}
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        action: "upload"
+        app_location: ${{ env.APP_LOCATION }}
+        api_location: ${{ env.API_LOCATION }}
+        output_location: ${{ env.OUTPUT_LOCATION }}
+          
+    
+  
