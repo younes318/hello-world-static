@@ -19,13 +19,13 @@ jobs:
     - uses: actions/checkout@v3
     - name: code check
       run: |
-        This code check 
-        echo the task of code check
+        echo Code check 
+        echo This is the task of code check
       
     - name: unit testing
       run: |
-        This unit testing 
-        echo the task of unit testing
+        echo Unit testing 
+        echo This is the task of unit testing
 
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
