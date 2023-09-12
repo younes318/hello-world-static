@@ -4,8 +4,8 @@ env:
   API_LOCATION: "api" # location of your api source code - optional
   OUTPUT_LOCATION: "dist" # location of client code build output
 on:
-  push:
-    branches: [ "master" ]
+  #push:
+    #branches: [ "master" ]
   workflow_dispatch:
   
 permissions:
